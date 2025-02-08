@@ -10,7 +10,7 @@ const Gameboard = function() {
 
 	const markBoard = (move, playerPiece) => {
 		let targetCell = (move - 1)
-		if (board[targetCell].getCell() !== "_") {
+		if (board[targetCell].getCell() !== " ") {
 			alert("Sorry, that spot is taken. Try again!");
 			return false;
 		}
@@ -93,7 +93,7 @@ const Gameboard = function() {
 	}
 
 	const resetBoard = () => {
-		const newBoard = board.map(cell => cell.fillCell("_"));
+		const newBoard = board.map(cell => cell.fillCell(" "));
 		return newBoard
 	}
 
@@ -107,7 +107,7 @@ const Gameboard = function() {
 };
 
 const Cell = () => {
-	let value = "_";
+	let value = " ";
 
 	const fillCell = (playerPiece) => {
 		value = playerPiece;
