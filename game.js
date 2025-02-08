@@ -6,8 +6,6 @@ const Gameboard = function() {
 		board[i] = Cell();
 	}
 
-	const getBoard = () => board;
-
 	const markBoard = (move, playerPiece) => {
 		let targetCell = (move - 1)
 		if (board[targetCell].getCell() !== " ") {
@@ -98,7 +96,6 @@ const Gameboard = function() {
 	}
 
 	return {
-		getBoard,
 		markBoard,
 		printBoard,
 		checkForWinner,
