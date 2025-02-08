@@ -1,0 +1,28 @@
+body {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box
+}
+
+p.header {
+	text-align: center;
+}
+
+.container#grid {
+	display: flex;
+	flex-direction: column;
+	max-width: 800px;
+}
+
+.container#grid .row {
+	background: gray;
+	display: flex;
+}
+
+.container#grid .row > .cell {
+	background: green;
+	border: 1px solid orange;
+	flex: 1;
+	height: 60%;
+	aspect-ratio: 1/1;
+}

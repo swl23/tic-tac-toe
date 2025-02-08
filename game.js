@@ -84,8 +84,12 @@ const Gameboard = function() {
 				board[6] === piece)) {
 					return player;
 				}
-			else {
-				return false
+			else if (!board.includes(" ")) {	// cat's game
+				const catsGame = "tie";
+				return catsGame;
+			}
+			else {								// no winner yet & still 
+				return false					// have squares free
 			}
 		}
 	}
@@ -163,15 +167,23 @@ const Gamemaster = (playerOne = prompt("Enter player 1 name: "), playerTwo = pro
 		};
 		board.printBoard();
 		const winner = board.checkForWinner(players);
-		if (winner !== false) {
+		if (winner === "tie") {
+			printScore();
+			alert("Cat's game! New game...");
+			board.resetBoard();
+			console.log("===== NEW GAME =====")
+			board.printBoard();
+		}
+		else if (winner === false) {
+			printScore();
+		}
+		else {
 			winner.score.incrementScore();
 			printScore();
 			alert(winner.name.toUpperCase() + " WINS!");
 			board.resetBoard();
+			console.log("===== NEW GAME =====")
 			board.printBoard();
-		}
-		else {
-			printScore();
 		}
 		switchPlayer();
 	};
@@ -202,4 +214,6 @@ const keepScore = () => {
 	}
 };
 
-const game = Gamemaster().playGame();
+window.addEventListener("load", () => {
+/* 	const game = Gamemaster().playGame(); */
+})
