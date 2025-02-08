@@ -6,13 +6,12 @@ const Gameboard = function() {
 		board[i] = Cell();
 	}
 
-
 	const getBoard = () => board;
 
 	const markBoard = (move, playerPiece) => {
 		let targetCell = (move - 1)
 		if (board[targetCell].getCell() !== "_") {
-			alert("Sorry, that spot is taken. You lose your turn!");
+			alert("Sorry, that spot is taken. Try again!");
 			return false;
 		}
 		else {
@@ -43,20 +42,69 @@ const Gameboard = function() {
 				row3.push(boardWithValues[i])
 			}
 		}
+		
 		printedBoard.push(row1, row2, row3);
-		console.log(printedBoard);
+		printedBoard.map(row => console.log(row))
+		console.log("\n")
 	}
 
-	const checkForWinner = () => {
-		
+	const checkForWinner = (players) => {
+		for (i = 0; i < players.length; i++) {
+			const board = getBoardWithValues();
+			const player = players[i];
+			const piece = players[i].piece;
+			if ((board[0] === piece &&			// row 1 win
+				board[1] === piece &&
+				board[2] === piece) ||
+				
+				(board[3] === piece &&			// row 2 win
+				board[4] === piece &&
+				board[5] === piece) ||
+			
+				(board[6] === piece &&			// row 3 win
+				board[7] === piece &&
+				board[8] === piece) ||
+				
+				(board[0] === piece &&			// col 1 win
+				board[3] === piece &&
+				board[6] === piece) ||
+				
+				(board[1] === piece &&			// col 2 win
+				board[4] === piece &&
+				board[7] === piece) ||
+
+				(board[6] === piece &&			// col 3 win
+				board[7] === piece &&
+				board[8] === piece) ||
+				
+				(board[0] === piece &&			// L -> R down diagonal win
+				board[4] === piece &&
+				board[8] === piece) ||
+				
+				(board[2] === piece &&			// L -> R up diagonal win
+				board[4] === piece &&
+				board[6] === piece)) {
+					return player;
+				}
+			else {
+				return false
+			}
+		}
+	}
+
+	const resetBoard = () => {
+		const newBoard = board.map(cell => cell.fillCell("_"));
+		return newBoard
 	}
 
 	return {
 		getBoard,
 		markBoard,
-		printBoard
+		printBoard,
+		checkForWinner,
+		resetBoard
 	};
-}
+};
 
 const Cell = () => {
 	let value = "_";
@@ -72,17 +120,19 @@ const Cell = () => {
 		fillCell,
 		getCell
 	};
-}
+};
 
-const Gamemaster = (playerOne = "Toby", playerTwo = "Alice") => {
+const Gamemaster = (playerOne = prompt("Enter player 1 name: "), playerTwo = prompt("Enter player 2 name: ")) => {
 	const players = [
 		{
 			name: playerOne,
-			piece: "X"
+			piece: "X",
+			score: keepScore()
 		},
 		{
 			name: playerTwo,
-			piece: "O"
+			piece: "O",
+			score: keepScore()
 		}
 	];
 	let activePlayer = players[0];
@@ -100,6 +150,12 @@ const Gamemaster = (playerOne = "Toby", playerTwo = "Alice") => {
 		return activePlayer;
 	};
 
+	const printScore = () => {
+		for (i = 0; i < players.length; i++) {
+			console.log(players[i].name.toUpperCase() + " SCORE = " + players[i].score.getScore())
+		}
+	};
+
 	const getMove = () => {
 		const move = Number(prompt(`${activePlayer.name}, choose your square.`));
 		return move;
@@ -107,24 +163,49 @@ const Gamemaster = (playerOne = "Toby", playerTwo = "Alice") => {
 
 	const playRound = () => {
 		const move = getMove();
-		board.markBoard(move, `${activePlayer.piece}`);
+		if (!board.markBoard(move, `${activePlayer.piece}`)) {
+			switchPlayer()
+		};
 		board.printBoard();
+		const winner = board.checkForWinner(players);
+		if (winner !== false) {
+			winner.score.incrementScore();
+			printScore();
+			alert(winner.name.toUpperCase() + " WINS!");
+			board.resetBoard();
+			board.printBoard();
+		}
+		else {
+			printScore();
+		}
 		switchPlayer();
+	};
+
+	const playGame = () => {
+		while (true) {
+			playRound();
+		}
 	}
 
 	return {
 		getActivePlayer,
 		switchPlayer,
-		playRound,
+		playGame,
 		getMove
 	};
-}
+};
 
-const game = Gamemaster();
-game.playRound();
-game.playRound();
-game.playRound();
-game.playRound();
-game.playRound();
-game.playRound();
-game.playRound();
+const keepScore = () => {
+	let score = 0;
+
+	const getScore = () => score;
+
+	const incrementScore = () => score++;
+
+	return {
+		getScore,
+		incrementScore,
+	}
+};
+
+const game = Gamemaster().playGame();
