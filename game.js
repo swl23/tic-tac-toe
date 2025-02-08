@@ -138,8 +138,6 @@ const Gamemaster = (playerOne = prompt("Enter player 1 name: "), playerTwo = pro
 	let activePlayer = players[0];
 	let board = Gameboard()
 
-	const getActivePlayer = () => activePlayer;
-
 	const switchPlayer = () => {
 		if (activePlayer === players[0]) {
 			activePlayer = players[1];
@@ -188,7 +186,6 @@ const Gamemaster = (playerOne = prompt("Enter player 1 name: "), playerTwo = pro
 	}
 
 	return {
-		getActivePlayer,
 		switchPlayer,
 		playGame,
 		getMove
