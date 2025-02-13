@@ -1,7 +1,6 @@
 const Gameboard = function() {
 	const cells = 9;
 	let board = [];
-
 	for (i = 0; i < cells; i++) {
 		board[i] = Cell();
 	}
@@ -17,40 +16,22 @@ const Gameboard = function() {
 			return board;
 		}
 	}
-
 	const getBoardWithValues = () => {
 		const boardWithValues = board.map(cell => cell.getCell());
 		return boardWithValues
 	}
-
 	const printBoard = () => {
 		const boardWithValues = getBoardWithValues();
-		const printedBoard = [];
-		const row1 = [];
-		const row2 = [];
-		const row3 = [];
 		for (i = 0; i < boardWithValues.length; i++) {
-			if (i >= 0 && i <= 2) {
-				row1.push(boardWithValues[i])
-			}
-			else if (i >= 3 && i <= 5) {
-				row2.push(boardWithValues[i])
-			}
-			else if (i >= 6 && i <= 8) {
-				row3.push(boardWithValues[i])
-			}
+			const square = document.getElementById(i + 1);
+			square.firstChild.textContent = boardWithValues[i]
 		}
-		
-		printedBoard.push(row1, row2, row3);
-		printedBoard.map(row => console.log(row))
-		console.log("\n")
 	}
-
 	const checkForWinner = (players) => {
 		for (i = 0; i < players.length; i++) {
 			const board = getBoardWithValues();
 			const player = players[i];
-			const piece = players[i].piece;
+			const piece = player.piece;
 			if ((board[0] === piece &&			// row 1 win
 				board[1] === piece &&
 				board[2] === piece) ||
@@ -71,74 +52,74 @@ const Gameboard = function() {
 				board[4] === piece &&
 				board[7] === piece) ||
 
-				(board[6] === piece &&			// col 3 win
-				board[7] === piece &&
+				(board[2] === piece &&			// col 3 win
+				board[5] === piece &&
 				board[8] === piece) ||
 				
 				(board[0] === piece &&			// L -> R down diagonal win
 				board[4] === piece &&
 				board[8] === piece) ||
 				
-				(board[2] === piece &&			// L -> R up diagonal win
+				(board[6] === piece &&			// L -> R up diagonal win
 				board[4] === piece &&
-				board[6] === piece)) {
+				board[2] === piece)) {
 					return player;
-				}
-			else if (!board.includes(" ")) {	// cat's game
-				const catsGame = "tie";
-				return catsGame;
-			}
-			else {								// no winner yet & still 
-				return false					// have squares free
-			}
-		}
-	}
-
+				};
+		};
+	};
+	const checkForTie = () => {
+		const board = getBoardWithValues();
+		if (!board.includes(" ")) {
+			const catsGame = "tie";
+			return catsGame;
+		};
+	};
 	const resetBoard = () => {
 		const newBoard = board.map(cell => cell.fillCell(" "));
 		return newBoard
 	}
-
 	return {
 		markBoard,
 		printBoard,
 		checkForWinner,
-		resetBoard
+		checkForTie,
+		resetBoard,
+		getBoardWithValues
 	};
 };
 
 const Cell = () => {
 	let value = " ";
-
 	const fillCell = (playerPiece) => {
 		value = playerPiece;
 		return value
 	};
-
 	const getCell = () => value;
-
 	return {
 		fillCell,
 		getCell
 	};
 };
 
-const Gamemaster = (playerOne = prompt("Enter player 1 name: "), playerTwo = prompt("Enter player 2 name: ")) => {
+const Gamemaster = (playerOne, playerTwo) => {
 	const players = [
 		{
 			name: playerOne,
-			piece: "X",
+			piece: "x",
 			score: keepScore()
 		},
 		{
 			name: playerTwo,
-			piece: "O",
+			piece: "o",
 			score: keepScore()
 		}
 	];
 	let activePlayer = players[0];
-	let board = Gameboard()
-
+	let board = Gameboard();
+	
+	const getBoard = () => board;
+	const getPlayers = () => players;
+	const getActivePlayer = () => activePlayer;
 	const switchPlayer = () => {
 		if (activePlayer === players[0]) {
 			activePlayer = players[1];
@@ -148,56 +129,67 @@ const Gamemaster = (playerOne = prompt("Enter player 1 name: "), playerTwo = pro
 		};
 		return activePlayer;
 	};
-
 	const printScore = () => {
 		for (i = 0; i < players.length; i++) {
-			console.log(players[i].name.toUpperCase() + " SCORE = " + players[i].score.getScore())
+			const namebox = document.getElementById(`player${i+1}`);
+			const scorebox = document.getElementById(`p${i+1}score`);
+			const playerScore = players[i].score.getScore();
+			namebox.textContent = `${players[i].name.toUpperCase()} (${players[i].piece}): `;
+			scorebox.textContent = playerScore;
 		}
 	};
-
+	const showResult = (input) => {
+		const dialog = document.getElementById("result");
+		const announce = document.getElementById("announcement");
+		const btn = document.getElementById("continue");
+		if (players.includes(input)) {
+			announce.textContent = `${input.name.toUpperCase()} WINS!`
+		}
+		else {
+			announce.textContent = `CAT'S GAME!`
+		}
+		btn.addEventListener("click", () => {
+			board.resetBoard();
+			board.printBoard();
+			dialog.close()
+		})
+		dialog.showModal();
+	}
 	const getMove = () => {
-		const move = Number(prompt(`${activePlayer.name}, choose your square.`));
+		const move = Number(Math.floor(Math.random() * 9) + 1);
 		return move;
 	};
-
-	const playRound = () => {
-		const move = getMove();
-		if (!board.markBoard(move, `${activePlayer.piece}`)) {
+	const playRound = (squareID) => {						// receive clicked ID from square
+		const move = squareID;
+		const player = getActivePlayer();
+		if (!board.markBoard(move, player.piece)) {
 			switchPlayer()
 		};
 		board.printBoard();
 		const winner = board.checkForWinner(players);
-		if (winner === "tie") {
-			printScore();
-			alert("Cat's game! New game...");
-			board.resetBoard();
-			console.log("===== NEW GAME =====")
+		if (winner) {
 			board.printBoard();
-		}
-		else if (winner === false) {
-			printScore();
-		}
-		else {
 			winner.score.incrementScore();
 			printScore();
-			alert(winner.name.toUpperCase() + " WINS!");
-			board.resetBoard();
-			console.log("===== NEW GAME =====")
-			board.printBoard();
+			showResult(winner);
 		}
+		else if (!winner) {
+			const tie = board.checkForTie();
+			if (tie) {
+				printScore();
+				showResult(tie);
+			};
+		};
 		switchPlayer();
 	};
-
-	const playGame = () => {
-		while (true) {
-			playRound();
-		}
-	}
-
 	return {
 		switchPlayer,
-		playGame,
-		getMove
+		playRound,
+		getMove,
+		getActivePlayer,
+		getBoard,
+		getPlayers,
+		printScore
 	};
 };
 
@@ -205,15 +197,51 @@ const keepScore = () => {
 	let score = 0;
 
 	const getScore = () => score;
-
 	const incrementScore = () => score++;
-
 	return {
 		getScore,
 		incrementScore,
 	}
 };
 
-window.addEventListener("load", () => {
-/* 	const game = Gamemaster().playGame(); */
-})
+const display = (game) => {
+
+	const createGrid = () => {
+		const grid = document.getElementById("grid");				// grab "grid" div
+		for (i = 0; i < 9; i++) {									// loop to make a row (x3)
+			const cell = document.createElement("div");
+			cell.setAttribute("id", `${i + 1}`);
+			cell.setAttribute("class", "cell");
+			cell.addEventListener("click", () => {			// on click,
+				const id = cell.id;							// get id value of clicked div
+				game.playRound(id);								// and feed that to playRound as move
+			})
+			const text = document.createElement("p");
+			cell.appendChild(text);
+			grid.appendChild(cell);
+		}
+	}
+
+	return {
+		createGrid
+	}
+}
+
+const storeInput = (formId) => {
+	const input = document.getElementById(formId);
+	return input.value
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+	/* const playerCreate = document.getElementById("player-create");
+	playerCreate.showModal();
+
+	playerCreate.addEventListener("submit", () => {
+		const playerOneName = storeInput("player-one");
+		const playerTwoName = storeInput("player-two");
+		const game = Gamemaster(playerOneName, playerTwoName); */
+		const game = Gamemaster("Steven", "Ivana");
+		display(game).createGrid();
+		game.printScore();
+	})
+/* }) */
